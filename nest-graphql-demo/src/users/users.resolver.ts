@@ -1,0 +1,43 @@
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  Subscription,
+} from '@nestjs/graphql';
+import { UsersService } from './users.service';
+import { User } from './user.entity';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
+
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Query(() => [User])
+  users() {
+    return this.usersService.findAll();
+  }
+
+  @Query(() => User)
+  user(@Args('id', { type: () => Int }) id: number) {
+    return this.usersService.findOne(id);
+  }
+
+  @Mutation(() => User)
+  createUser(
+    @Args('name') name: string,
+    @Args('age', { type: () => Int }) age: number,
+  ) {
+    const user = this.usersService.createUser(name, age);
+    pubSub.publish('userCreated', { userCreated: user });
+    return user;
+  }
+
+  @Subscription(() => User)
+  userCreated() {
+    return pubSub.asyncIterator('userCreated');
+  }
+}
