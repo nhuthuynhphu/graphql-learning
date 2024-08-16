@@ -5,6 +5,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { UsersModule } from './users/users.modules';
+import { DateScalar } from './common/scalars/date.scalar';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -13,12 +15,20 @@ import { UsersModule } from './users/users.modules';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       subscriptions: {
-        'graphql-ws': true,
+        'graphql-ws': {
+          onConnect: (ctx) => {
+            console.log('CLIENT CONNECTED');
+          },
+          onSubscribe: (ctx) => {
+            console.log('CLIENT SUBSCRIBED');
+          },
+        },
       },
     }),
     UsersModule,
+    PostsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DateScalar],
 })
 export class AppModule {}

@@ -5,16 +5,25 @@ import {
   Args,
   Int,
   Subscription,
+  ResolveField,
+  Parent,
 } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { PubSub } from 'graphql-subscriptions';
+import { Post } from '../posts/posts.entity';
+import { PostsService } from '../posts/posts.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 const pubSub = new PubSub();
 
 @Resolver(() => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => PostsService))
+    private readonly postsService: PostsService,
+  ) {}
 
   @Query(() => [User])
   users() {
@@ -39,5 +48,10 @@ export class UsersResolver {
   @Subscription(() => User)
   userCreated() {
     return pubSub.asyncIterator('userCreated');
+  }
+
+  @ResolveField(() => [Post])
+  posts(@Parent() user: User) {
+    return this.postsService.findByUser(user.id);
   }
 }
