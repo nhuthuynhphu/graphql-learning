@@ -2,11 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Comment {
+  id: Int!
+  content: String!
+  author: User!
+  post: Post!
+}
+
 type Post {
   id: Int!
   title: String!
   content: String!
   author: User!
+  comments: [Comment]
 }
 
 type User {
@@ -22,12 +30,20 @@ scalar Date
 type Query {
   users: [User!]!
   user(id: Int!): User!
-  posts: [Post!]!
+  posts(page: Int! = 1, limit: Int! = 10, title: String): [Post!]!
+  post(id: Int!): Post!
+  comments: [Comment!]!
 }
 
 type Mutation {
-  createUser(name: String!, age: Int!): User!
+  createUser(createUserDto: CreateUserDto!): User!
   createPost(userId: Int!, title: String!, content: String!): Post!
+  createComment(userId: Int!, postId: Int!, content: String!): Comment!
+}
+
+input CreateUserDto {
+  name: String!
+  age: Int!
 }
 
 type Subscription {

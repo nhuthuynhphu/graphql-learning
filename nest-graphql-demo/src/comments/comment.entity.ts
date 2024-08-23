@@ -1,17 +1,18 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { User } from '../users/user.entity';
 import { Post } from '../posts/post.entity';
 
 @ObjectType()
-export class User {
+export class Comment {
   @Field(() => Int)
   id: number;
 
   @Field()
-  name: string;
+  content: string;
 
-  @Field(() => Int)
-  age: number;
+  @Field(() => User)
+  author: User;
 
-  @Field(() => [Post], { nullable: 'itemsAndList' })
-  posts?: Post[];
+  @Field(() => Post)
+  post: Post;
 }

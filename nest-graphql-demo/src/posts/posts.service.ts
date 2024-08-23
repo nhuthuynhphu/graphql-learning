@@ -1,15 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Post } from './posts.entity';
+import { Post } from './post.entity';
 import { UsersService } from '../users/users.service';
+import { CommentsService } from '../comments/comments.service';
+import { Comment } from '../comments/comment.entity';
 
 @Injectable()
 export class PostsService {
   private posts: Post[] = [];
 
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
-  findAll(): Post[] {
+  findAll(title?: string): Post[] {
+    if (title) {
+      return this.posts.filter((post) => post.title.indexOf(title) > -1);
+    }
     return this.posts;
+  }
+
+  findOne(id: number) {
+    return this.posts.find((post) => post.id === id);
   }
 
   findByUser(userId: number): Post[] {
@@ -23,8 +35,13 @@ export class PostsService {
       title,
       content,
       author: user,
+      comments: [],
     };
     this.posts.push(post);
     return post;
+  }
+
+  getCommentsForPost(postId: number): Comment[] {
+    return this.commentsService.findByPost(postId);
   }
 }

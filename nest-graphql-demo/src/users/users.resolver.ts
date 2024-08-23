@@ -11,9 +11,10 @@ import {
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { PubSub } from 'graphql-subscriptions';
-import { Post } from '../posts/posts.entity';
+import { Post } from '../posts/post.entity';
 import { PostsService } from '../posts/posts.service';
 import { forwardRef, Inject } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 
 const pubSub = new PubSub();
 
@@ -36,10 +37,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => User)
-  createUser(
-    @Args('name') name: string,
-    @Args('age', { type: () => Int }) age: number,
-  ) {
+  createUser(@Args('createUserDto') createUserDto: CreateUserDto) {
+    const { name, age } = createUserDto;
     const user = this.usersService.createUser(name, age);
     pubSub.publish('userCreated', { userCreated: user });
     return user;

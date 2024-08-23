@@ -8,7 +8,7 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { PostsService } from './posts.service';
-import { Post } from './posts.entity';
+import { Post } from './post.entity';
 import { User } from '../users/user.entity';
 
 @Resolver(() => Post)
@@ -16,8 +16,18 @@ export class PostsResolver {
   constructor(private readonly postsService: PostsService) {}
 
   @Query(() => [Post])
-  posts() {
-    return this.postsService.findAll();
+  posts(
+    @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+    @Args('title', { type: () => String, nullable: true }) title?: string,
+  ) {
+    const offset = (page - 1) * limit;
+    return this.postsService.findAll(title).slice(offset, offset + limit);
+  }
+
+  @Query(() => Post)
+  post(@Args('id', { type: () => Int }) id: number) {
+    return this.postsService.findOne(id);
   }
 
   @Mutation(() => Post)
@@ -32,5 +42,10 @@ export class PostsResolver {
   @ResolveField(() => User)
   author(@Parent() post: Post) {
     return post.author;
+  }
+
+  @ResolveField(() => [Comment])
+  comments(@Parent() post: Post) {
+    return this.postsService.getCommentsForPost(post.id);
   }
 }
