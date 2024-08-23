@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, gql } from '@apollo/client';
 
 const CREATE_COMMENT_MUTATION = gql`
@@ -17,9 +17,29 @@ const CREATE_COMMENT_MUTATION = gql`
   }
 `;
 
-function CreateComment({ postId }: any) {
+function CreateComment({ postId, initialComment }: any) {
   const [content, setContent] = useState('');
   const [createComment] = useMutation(CREATE_COMMENT_MUTATION);
+  const [comments, setComments] = useState<any>(initialComment);
+
+  useEffect(() => {
+    // Listen for new comments via SSE
+    const eventSource = new EventSource(`http://localhost:3000/comments/sse`);
+
+    eventSource.onmessage = function (event) {
+      const newComment = JSON.parse(event.data);
+      console.log(newComment);
+
+      // Check if the comment belongs to the current post
+      if (newComment.post.id == postId) {
+        setComments((prevComments: any) => [...prevComments, newComment]);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [postId]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -39,15 +59,24 @@ function CreateComment({ postId }: any) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <textarea
-        placeholder="Add a comment"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        required
-      />
-      <button type="submit">Post Comment</button>
-    </form>
+    <div>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          placeholder="Add a comment"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+        />
+        <button type="submit">Post Comment</button>
+      </form>
+      <ul>
+        {comments?.map((comment: any) => (
+          <li key={comment.id}>
+            <strong>{comment.author.name}:</strong> {comment.content}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -40,14 +40,7 @@ export default function PostDetail() {
       <h1>{post.title}</h1>
       <p>{post.content}</p>
       <h3>Comments</h3>
-      <CreateComment postId={id} />
-      <ul>
-        {post.comments?.map((comment: any) => (
-          <li key={comment.id}>
-            <strong>{comment.author.name}:</strong> {comment.content}
-          </li>
-        ))}
-      </ul>
+      <CreateComment postId={id} initialComment={post.comments} />
     </div>
   );
 }

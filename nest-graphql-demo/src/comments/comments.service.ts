@@ -2,16 +2,22 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Comment } from './comment.entity';
 import { UsersService } from '../users/users.service';
 import { PostsService } from '../posts/posts.service';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class CommentsService {
   private comments: Comment[] = [];
+  private commentAddedSubject = new Subject<any>();
 
   constructor(
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => PostsService))
     private readonly postsService: PostsService,
   ) {}
+
+  get commentAdded$() {
+    return this.commentAddedSubject.asObservable();
+  }
 
   findAll(): Comment[] {
     return this.comments;
@@ -31,6 +37,7 @@ export class CommentsService {
       post,
     };
     this.comments.push(comment);
+    this.commentAddedSubject.next(comment);
     return comment;
   }
 }
