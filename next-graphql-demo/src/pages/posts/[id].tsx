@@ -1,5 +1,6 @@
 import CreateComment from '@/component/createComment';
 import { useQuery, gql } from '@apollo/client';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const GET_POST_QUERY = gql`
@@ -34,6 +35,8 @@ export default function PostDetail() {
 
   return (
     <div>
+      <Link href={`/posts`}>Back</Link>
+      <br />
       <h1>{post.title}</h1>
       <p>{post.content}</p>
       <h3>Comments</h3>

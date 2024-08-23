@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, gql } from '@apollo/client';
+import Link from 'next/link';
 
 const CREATE_POST_MUTATION = gql`
   mutation CreatePost($userId: Int!, $title: String!, $content: String!) {
@@ -39,21 +40,25 @@ export default function CreatePost() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        required
-      />
-      <button type="submit">Create Post</button>
-    </form>
+    <div>
+      <Link href="/posts">Go to list</Link>
+      <br />
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <textarea
+          placeholder="Content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+        />
+        <button type="submit">Create Post</button>
+      </form>
+    </div>
   );
 }

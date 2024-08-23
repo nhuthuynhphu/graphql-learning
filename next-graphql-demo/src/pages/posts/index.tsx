@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
+import Link from 'next/link';
 
 const GET_POSTS = gql`
   query GetPosts($page: Int!, $limit: Int!, $title: String) {
@@ -20,6 +21,7 @@ export default function Posts() {
 
   const { loading, error, data } = useQuery(GET_POSTS, {
     variables: { page, limit: 10, title },
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) return <p>Loading...</p>;
@@ -27,6 +29,8 @@ export default function Posts() {
 
   return (
     <div>
+      <Link href="posts/create">Add new post</Link>
+      <br />
       <input
         type="text"
         value={title}
@@ -40,9 +44,11 @@ export default function Posts() {
       <ul>
         {data.posts.map((post: any) => (
           <li key={post.id}>
-            <h2>
-              {post.id} - {post.title}
-            </h2>
+            <Link href={`posts/${post.id}`}>
+              <h2>
+                {post.id} - {post.title}
+              </h2>
+            </Link>
             <p>{post.content}</p>
             <p>By: {post.author.name}</p>
           </li>
